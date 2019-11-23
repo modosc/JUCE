@@ -739,7 +739,6 @@ public:
 
         if (style == RotaryHorizontalDrag
             || style == RotaryVerticalDrag
-            || style == IncDecButtons
             || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar || style == LinearBarVertical)
                 && ! snapsToMousePos))
         {
@@ -759,7 +758,7 @@ public:
                 decButton->setState (mouseDiff > 0 ? Button::buttonNormal : Button::buttonDown);
             }
         }
-        else if (style == RotaryHorizontalVerticalDrag)
+        else if (style == RotaryHorizontalVerticalDrag || style == IncDecButtons)
         {
             auto mouseDiff = (e.position.x - mouseDragStartPos.x)
                                + (mouseDragStartPos.y - e.position.y);
@@ -1206,15 +1205,26 @@ public:
         }
         else if (style == IncDecButtons)
         {
-            resizeIncDecButtons();
+            resizeIncDecButtons(lf);
         }
     }
 
     //==============================================================================
 
-    void resizeIncDecButtons()
+    void resizeIncDecButtons(LookAndFeel& lf)
     {
         auto buttonRect = sliderRect;
+
+        if (textBoxPos == TextBoxCentre)
+        {
+//          buttonRect.expand (-2, -2);
+          incDecButtonsSideBySide = true;
+          auto layout = lf.getSliderLayout (owner);
+          auto buttonWidth = (buttonRect.getWidth() - layout.textBoxBounds.getWidth()) / 2;
+          decButton->setBounds(buttonRect.removeFromLeft(buttonWidth) );
+          incButton->setBounds(buttonRect.removeFromRight(buttonWidth) );
+          return;
+        }
 
         if (textBoxPos == TextBoxLeft || textBoxPos == TextBoxRight)
             buttonRect.expand (-2, 0);

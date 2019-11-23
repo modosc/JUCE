@@ -97,7 +97,8 @@ public:
         TextBoxLeft,            /**< Puts the text box to the left of the slider, vertically centred.  */
         TextBoxRight,           /**< Puts the text box to the right of the slider, vertically centred.  */
         TextBoxAbove,           /**< Puts the text box above the slider, horizontally centred.  */
-        TextBoxBelow            /**< Puts the text box below the slider, horizontally centred.  */
+        TextBoxBelow,           /**< Puts the text box below the slider, horizontally centred.  */
+        TextBoxCentre           /**< Puts the text box in the slider, horizontally and vertically centred  */
     };
 
     /** Describes the type of mouse-dragging that is happening when a value is being changed.

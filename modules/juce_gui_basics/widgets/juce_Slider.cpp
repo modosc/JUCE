@@ -382,7 +382,7 @@ public:
 
     void incrementOrDecrement (double delta)
     {
-        if (style == IncDecButtons)
+        if (style == IncDecButtons || style == TextVerticalDrag)
         {
             auto newValue = owner.snapValue (getValue() + delta, notDragging);
 
@@ -453,7 +453,7 @@ public:
         else
             pos = owner.valueToProportionOfLength (value);
 
-        if (isVertical() || style == IncDecButtons)
+        if (isVertical() || style == IncDecButtons || style == TextVerticalDrag)
             pos = 1.0 - pos;
 
         jassert (pos >= 0 && pos <= 1.0);
@@ -557,7 +557,7 @@ public:
 
     void lookAndFeelChanged (LookAndFeel& lf)
     {
-        if (textBoxPos != NoTextBox)
+        if (textBoxPos != NoTextBox || style == TextVerticalDrag)
         {
             auto previousTextBoxContent = (valueBox != nullptr ? valueBox->getText()
                                                                : owner.getTextFromValue (currentValue.getValue()));
@@ -572,7 +572,7 @@ public:
             updateTextBoxEnablement();
             valueBox->onTextChange = [this] { textChanged(); };
 
-            if (style == LinearBar || style == LinearBarVertical)
+            if (style == LinearBar || style == LinearBarVertical || style == TextVerticalDrag)
             {
                 valueBox->addMouseListener (&owner, false);
                 valueBox->setMouseCursor (MouseCursor::ParentCursor);
@@ -758,7 +758,7 @@ public:
                 decButton->setState (mouseDiff > 0 ? Button::buttonNormal : Button::buttonDown);
             }
         }
-        else if (style == RotaryHorizontalVerticalDrag)
+        else if (style == RotaryHorizontalVerticalDrag || style == TextVerticalDrag)
         {
             auto mouseDiff = (e.position.x - mouseDragStartPos.x)
                                + (mouseDragStartPos.y - e.position.y);
@@ -783,7 +783,7 @@ public:
     {
         bool hasHorizontalStyle =
             (isHorizontal() ||  style == RotaryHorizontalDrag
-                            || (style == IncDecButtons && incDecDragDirectionIsHorizontal()));
+                            || ((style == IncDecButtons || style == TextVerticalDrag) && incDecDragDirectionIsHorizontal()));
 
         auto mouseDiff = style == RotaryHorizontalVerticalDrag
                             ? (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y)
@@ -804,7 +804,7 @@ public:
                 speed = -speed;
 
             if (isVertical() || style == RotaryVerticalDrag
-                 || (style == IncDecButtons && ! incDecDragDirectionIsHorizontal()))
+                 || ((style == IncDecButtons || style == TextVerticalDrag) && ! incDecDragDirectionIsHorizontal()))
                 speed = -speed;
 
             auto newPos = owner.valueToProportionOfLength (valueWhenLastDragged) + speed;
@@ -884,7 +884,7 @@ public:
             }
             else
             {
-                if (style == IncDecButtons && ! incDecDragged)
+                if ((style == IncDecButtons || style == TextVerticalDrag) && ! incDecDragged)
                 {
                     if (e.getDistanceFromDragStart() < 10 || ! e.mouseWasDraggedSinceMouseDown())
                         return;
@@ -942,7 +942,7 @@ public:
         if (owner.isEnabled()
              && useDragEvents
              && (normRange.end > normRange.start)
-             && (style != IncDecButtons || incDecDragged))
+             && (style != IncDecButtons || style != TextVerticalDrag || incDecDragged))
         {
             restoreMouseIfHidden();
 
@@ -1034,6 +1034,7 @@ public:
     {
         return doubleClickToValue
                 && style != IncDecButtons
+                && style != TextVerticalDrag
                 && normRange.start <= doubleClickReturnValue
                 && normRange.end >= doubleClickReturnValue;
     }
@@ -1049,7 +1050,7 @@ public:
 
     double getMouseWheelDelta (double value, double wheelAmount)
     {
-        if (style == IncDecButtons)
+        if (style == IncDecButtons || style == TextVerticalDrag)
             return normRange.interval * wheelAmount;
 
         auto proportionDelta = wheelAmount * 0.15;
@@ -1099,7 +1100,7 @@ public:
 
     void modifierKeysChanged (const ModifierKeys& modifiers)
     {
-        if (style != IncDecButtons && style != Rotary && isAbsoluteDragMode (modifiers))
+        if (style != IncDecButtons && style != TextVerticalDrag && style != Rotary && isAbsoluteDragMode (modifiers))
             restoreMouseIfHidden();
     }
 
@@ -1154,7 +1155,11 @@ public:
     {
         if (style != IncDecButtons)
         {
-            if (isRotary())
+            if (style == TextVerticalDrag)
+            {
+              // noop
+            }
+            else if (isRotary())
             {
                 auto sliderPos = (float) owner.valueToProportionOfLength (lastCurrentValue);
                 jassert (sliderPos >= 0 && sliderPos <= 1.0f);

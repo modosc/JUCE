@@ -119,6 +119,7 @@ protected:
     //==============================================================================
     SampleType processSample (SampleType inputValue, size_t channelToUse) noexcept;
     void updateSmoothers() noexcept;
+    SmoothedValue<SampleType> cutoffTransformSmoother, scaledResonanceSmoother;
 
 private:
     //==============================================================================
@@ -134,7 +135,6 @@ private:
     std::vector<std::array<SampleType, numStates>> state;
     std::array<SampleType, numStates> A;
 
-    SmoothedValue<SampleType> cutoffTransformSmoother, scaledResonanceSmoother;
     SampleType cutoffTransformValue, scaledResonanceValue;
 
     LookupTableTransform<SampleType> saturationLUT { [] (SampleType x) { return std::tanh (x); },

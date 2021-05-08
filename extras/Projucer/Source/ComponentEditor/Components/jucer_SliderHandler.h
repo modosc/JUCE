@@ -666,6 +666,8 @@ private:
             case Slider::TwoValueVertical:              return "TwoValueVertical";
             case Slider::ThreeValueHorizontal:          return "ThreeValueHorizontal";
             case Slider::ThreeValueVertical:            return "ThreeValueVertical";
+            case Slider::LinearBarVerticalDrag:         return "LinearBarVerticalDrag";
+            case Slider::LinearBarVerticalHorizontalDrag: return "LinearBarVerticalHorizontalDrag";
             default:                                    jassertfalse; break;
         }
 

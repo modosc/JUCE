@@ -62,7 +62,8 @@ public:
         return style == LinearHorizontal
             || style == LinearBar
             || style == TwoValueHorizontal
-            || style == ThreeValueHorizontal;
+            || style == ThreeValueHorizontal
+            || style == LinearBarVerticalDrag;
     }
 
     bool isVertical() const noexcept
@@ -70,7 +71,8 @@ public:
         return style == LinearVertical
             || style == LinearBarVertical
             || style == TwoValueVertical
-            || style == ThreeValueVertical;
+            || style == ThreeValueVertical
+            || style == LinearBarVerticalHorizontalDrag;
     }
 
     bool isRotary() const noexcept
@@ -84,7 +86,9 @@ public:
     bool isBar() const noexcept
     {
         return style == LinearBar
-            || style == LinearBarVertical;
+            || style == LinearBarVertical
+            || style == LinearBarVerticalDrag
+            || style == LinearBarVerticalHorizontalDrag;
     }
 
     bool isTwoValue() const noexcept
@@ -578,7 +582,7 @@ public:
             updateTextBoxEnablement();
             valueBox->onTextChange = [this] { textChanged(); };
 
-            if (style == LinearBar || style == LinearBarVertical)
+            if (style == LinearBar || style == LinearBarVertical || style == LinearBarVerticalDrag || style == LinearBarVerticalHorizontalDrag)
             {
                 valueBox->addMouseListener (&owner, false);
                 valueBox->setMouseCursor (MouseCursor::ParentCursor);
@@ -769,6 +773,32 @@ public:
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
+        }
+        else if (style == LinearBarVerticalDrag)
+        {
+            auto layout = owner.getLookAndFeel().getSliderLayout (owner);
+
+            if (layout.sliderBounds.toFloat().contains(e.position))
+            {
+              if (!layout.sliderBounds.toFloat().contains(mousePosWhenLastDragged))
+              {
+                mousePosWhenExited = Point<float>();
+              }
+              newPos = (mousePos - (float) sliderRegionStart) / (double) sliderRegionSize;
+
+            }
+            else
+            {
+              if (layout.sliderBounds.toFloat().contains(mousePosWhenLastDragged))
+              {
+                mousePosWhenExited = mousePosWhenLastDragged;
+              }
+              newPos = (mousePosWhenExited.getX() - (float) sliderRegionStart) / (double) sliderRegionSize;
+
+              jassert(!mousePosWhenExited.isOrigin());
+              auto fine = (e.position.y - (float) mousePosWhenExited.getY()) / ((double) sliderRegionSize * 32);
+              newPos -= fine;
+            }
         }
         else
         {
@@ -1180,7 +1210,7 @@ public:
                                      style, owner);
             }
 
-            if ((style == LinearBar || style == LinearBarVertical) && valueBox == nullptr)
+            if ((style == LinearBar || style == LinearBarVertical || style == LinearBarVerticalDrag || style == LinearBarVerticalHorizontalDrag) && valueBox == nullptr)
             {
                 g.setColour (owner.findColour (Slider::textBoxOutlineColourId));
                 g.drawRect (0, 0, owner.getWidth(), owner.getHeight(), 1);
@@ -1254,7 +1284,7 @@ public:
     double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
     int velocityModeThreshold = 1;
     RotaryParameters rotaryParams;
-    Point<float> mouseDragStartPos, mousePosWhenLastDragged;
+    Point<float> mouseDragStartPos, mousePosWhenLastDragged, mousePosWhenExited;
     int sliderRegionStart = 0, sliderRegionSize = 1;
     int sliderBeingDragged = -1;
     int pixelsForFullDragExtent = 250;

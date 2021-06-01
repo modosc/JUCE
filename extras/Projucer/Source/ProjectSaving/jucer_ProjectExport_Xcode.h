@@ -336,7 +336,7 @@ public:
                        "Disable this to enable non-fullscreen views such as Slide Over or Split View in your app. "
                        "You will also need to enable all orientations.");
         }
-        else if (projectType.isGUIApplication())
+        else if (projectType.isGUIApplication() || project.shouldBuildStandalonePlugin())
         {
             props.add (new TextPropertyComponent (documentExtensionsValue, "Document File Extensions", 128, false),
                        "A comma-separated list of file extensions for documents that your app can open. "

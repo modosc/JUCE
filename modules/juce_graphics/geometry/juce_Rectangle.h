@@ -593,13 +593,13 @@ public:
     /** Returns true if this coordinate is inside the rectangle. */
     bool contains (ValueType xCoord, ValueType yCoord) const noexcept
     {
-        return xCoord >= pos.x && yCoord >= pos.y && xCoord < pos.x + w && yCoord < pos.y + h;
+        return xCoord >= pos.x && yCoord >= pos.y && xCoord <= pos.x + w && yCoord <= pos.y + h;
     }
 
     /** Returns true if this coordinate is inside the rectangle. */
     bool contains (Point<ValueType> point) const noexcept
     {
-        return point.x >= pos.x && point.y >= pos.y && point.x < pos.x + w && point.y < pos.y + h;
+        return point.x >= pos.x && point.y >= pos.y && point.x <= pos.x + w && point.y <= pos.y + h;
     }
 
     /** Returns true if this other rectangle is completely inside this one. */

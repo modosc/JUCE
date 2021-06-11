@@ -777,10 +777,11 @@ public:
         else if (style == LinearBarVerticalDrag)
         {
             auto layout = owner.getLookAndFeel().getSliderLayout (owner);
+            auto sb = layout.sliderBounds.toFloat();
 
-            if (layout.sliderBounds.toFloat().contains(e.position))
+            if (sb.contains(e.position))
             {
-              if (!layout.sliderBounds.toFloat().contains(mousePosWhenLastDragged))
+              if (!sb.contains(mousePosWhenLastDragged))
               {
                 mousePosWhenExited = Point<float>();
               }
@@ -789,9 +790,35 @@ public:
             }
             else
             {
-              if (layout.sliderBounds.toFloat().contains(mousePosWhenLastDragged))
+              if (sb.contains(mousePosWhenLastDragged))
               {
-                mousePosWhenExited = mousePosWhenLastDragged;
+                // if mousePosWhenLastDragged was in our slider but e.position isn't we need to figure out
+                // which direction we went
+
+                // create a line between our last point and our current one
+                Line<float> mousePath{mousePosWhenLastDragged, e.position};
+
+                // build up four lines representing our rectangle sides
+                std::array<Line<float>, 4> lines{{
+                  {sb.getTopLeft(), sb.getTopRight()},
+                  {sb.getTopRight(), sb.getBottomRight()},
+                  {sb.getBottomLeft(), sb.getBottomRight()},
+                  {sb.getTopLeft(), sb.getBottomLeft()}}};
+
+                // reset mousePosWhenExited
+                mousePosWhenExited = Point<float>();
+
+                // iterate over the sides to find a match
+                for (auto &line: lines) {
+                  // we have to specifically check line.intersects AND mousePosWhenExited.isOrigin because
+                  if (line.intersects(mousePath, mousePosWhenExited) && sb.contains(mousePosWhenExited)) {
+                    break;
+                  }
+                }
+                if (mousePosWhenExited.isOrigin()) {
+                  DBG("no intersection, using default");
+                  mousePosWhenExited = mousePosWhenLastDragged;
+                }
               }
               newPos = (mousePosWhenExited.getX() - (float) sliderRegionStart) / (double) sliderRegionSize;
 
